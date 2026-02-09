@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const Project = require('./models/Project');
+const Contact = require('./models/Contact');
 
 const app = express();
 
@@ -44,6 +45,17 @@ app.post('/api/projects', async (req, res) => {
     res.status(201).json(newProject);
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+});
+
+// POST: Receive a new message
+app.post('/api/contact', async (req, res) => {
+  try {
+    const newContact = new Contact(req.body);
+    await newContact.save(); // Save to MongoDB
+    res.status(201).json({ message: "Message Sent Successfully!" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to send message" });
   }
 });
 
