@@ -59,6 +59,60 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
+// --- TEMPORARY SEED ROUTE ---
+const Project = require('./models/Project');
+
+app.get('/seed-db', async (req, res) => {
+  try {
+    // 1. Clear old data
+    await Project.deleteMany({});
+    
+    // 2. The Resume Data
+    const sampleProjects = [
+       {
+        title: "Connect Music",
+        description: "A web app that allows users to transfer music playlists seamlessly between Spotify and YouTube. Implemented secure authentication using OAuth 2.0.",
+        techStack: ["React.js", "Node.js", "Spotify API"],
+        category: "WEB",
+        liveLink: "#",
+        githubLink: "#"
+      },
+      {
+        title: "Decentralized Supply Chain",
+        description: "A transparent supply chain solution tracking product movement from manufacturer to consumer using smart contracts.",
+        techStack: ["Solidity", "React.js", "Web3.js"],
+        category: "BLOCKCHAIN",
+        liveLink: "#",
+        githubLink: "#"
+      },
+      {
+        title: "Decentralized Social Media",
+        description: "Censorship-resistant social media DApp where users create and interact with posts stored on the blockchain.",
+        techStack: ["React.js", "Solidity", "IPFS"],
+        category: "BLOCKCHAIN",
+        liveLink: "#",
+        githubLink: "#"
+      },
+      {
+        title: "Dark Theme Extension",
+        description: "Browser extension to apply dark mode on websites with customizable brightness and contrast.",
+        techStack: ["JavaScript", "HTML5"],
+        category: "WEB",
+        liveLink: "#",
+        githubLink: "#"
+      }
+    ];
+
+    // 3. Insert new data
+    await Project.insertMany(sampleProjects);
+    
+    res.send("✅ Database Seeded Successfully!");
+  } catch (err) {
+    res.status(500).send("❌ Seeding Failed: " + err.message);
+  }
+});
+// -----------------------------
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
