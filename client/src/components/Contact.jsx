@@ -11,7 +11,7 @@ const Contact = () => {
     setStatus('Sending...');
     
     try {
-      await axios.post('http://localhost:5000/api/contact', formData);
+      await axios.post('https://portfolio-39wr.onrender.com/api/contact', formData);
       setStatus('Message Transmitted Successfully! ✅');
       setFormData({ name: '', email: '', message: '' }); // Clear form immediately
       

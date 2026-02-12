@@ -8,7 +8,7 @@ const Projects = () => {
 
   // FETCH DATA FROM YOUR BACKEND
   useEffect(() => {
-    axios.get('http://localhost:5000/api/projects')
+    axios.get('https://portfolio-39wr.onrender.com/api/projects')
       .then(res => {
         setProjects(res.data);
       })
