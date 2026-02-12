@@ -10,7 +10,7 @@ const Footer = () => {
         <div className="text-center md:text-left">
           <div className="flex items-center gap-2 justify-center md:justify-start mb-2">
             <span className="text-cyber-purple font-bold">&lt;Praveen /&gt;</span>
-            <span className="text-gray-400 text-sm">https://gpraveen-portfolio.vercel.app/</span>
+            <span className="text-gray-400 text-sm"><a href="https://gpraveen-portfolio.vercel.app/">gpraveen@portfolio.com</a></span>
           </div>
           <p className="text-gray-500 text-xs">Web Designer and Full-Stack Developer</p>
         </div>
