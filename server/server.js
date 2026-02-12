@@ -59,8 +59,6 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-// --- TEMPORARY SEED ROUTE ---
-const Project = require('./models/Project');
 
 app.get('/seed-db', async (req, res) => {
   try {
