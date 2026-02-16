@@ -61,7 +61,8 @@ const Projects = () => {
           
           {/* Typing Text Effect */}
           <p className="text-cyber-purple font-mono text-sm animate-pulse">
-            &gt; Establishing Uplink to Server...
+            &gt; Establishing Uplink to Server... <br />
+            Hacking the server to show the details of the projects 
           </p>
           <p className="text-gray-600 font-mono text-xs">
             (This may take 30s for the first connection)
