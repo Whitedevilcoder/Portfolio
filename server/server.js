@@ -4,6 +4,9 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const Project = require('./models/Project');
 const Contact = require('./models/Contact');
+const User = require('./models/User');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 
@@ -59,6 +62,40 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
+// --- AUTHENTICATION ROUTES ---
+
+// 1. REGISTER (Run this ONCE to create your admin account, then delete)
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ username, password: hashedPassword });
+    await user.save();
+    res.json({ message: "Admin Created Successfully!" });
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// 2. LOGIN (This gives you the 'VIP Badge')
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
+    
+    if (!user) return res.status(400).json({ error: "User not found" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ error: "Invalid password" });
+
+    // Generate Token
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    res.json({ token, user: { username: user.username } });
+
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 
 // Start Server
 const PORT = process.env.PORT || 5000;
