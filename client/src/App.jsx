@@ -11,7 +11,7 @@ import Background from './components/Background'; // <--- Import
 
 function App() {
   return (
-    <div className="bg-cyber-black min-h-screen text-white relative">
+    <div className="bg-cyber-black min-h-screen text-white relative overflow-x-hidden">
       
       {/* The 3D Background (Fixed Position) */}
       <Background /> 

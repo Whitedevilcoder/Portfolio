@@ -14,7 +14,7 @@ const Hero = () => {
           transition={{ duration: 1 }}
           className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight"
         >
-          Praveen is a <span className="text-cyber-purple">MERN Stack</span> and <span className="text-cyber-purple">Blockchain</span> Developer.
+          Praveen is a <span className="text-cyber-purple">FULL Stack</span> and <span className="text-cyber-purple">Blockchain</span> Developer.
         </motion.h1>
         
         <motion.p 
