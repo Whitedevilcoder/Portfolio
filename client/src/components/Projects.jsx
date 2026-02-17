@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
+import API_URL from '../api';
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
@@ -10,7 +11,7 @@ const Projects = () => {
   
   // FETCH DATA FROM YOUR BACKEND
   useEffect(() => {
-    axios.get('https://portfolio-39wr.onrender.com/api/projects')
+    axios.get(`${API_URL}/api/projects`)  
       .then(res => {
         setProjects(res.data);
         setLoading(false); // <--- Stop loading when data arrives
