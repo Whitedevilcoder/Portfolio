@@ -7,6 +7,7 @@ const Projects = () => {
   const [filter, setFilter] = useState('ALL');
   const [loading, setLoading] = useState(true); // <--- New Loading State
 
+  
   // FETCH DATA FROM YOUR BACKEND
   useEffect(() => {
     axios.get('https://portfolio-39wr.onrender.com/api/projects')
