@@ -14,6 +14,20 @@ const app = express();
 app.use(express.json()); // Allows server to accept JSON data
 app.use(cors()); // Allows your frontend (React) to talk to this backend
 
+// --- MIDDLEWARE: The Security Guard ---
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Get token from "Bearer TOKEN"
+
+  if (!token) return res.sendStatus(401); // No token? Go away.
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403); // Fake token? Go away.
+    req.user = user;
+    next(); // Pass? Come on in.
+  });
+};
+
 // Database Connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected Successfully"))
@@ -96,6 +110,27 @@ app.post('/api/auth/login', async (req, res) => {
     res.status(500).json(err);
   }
 });
+
+// POST: Add a new Project (Protected)
+app.post('/api/projects', authenticateToken, async (req, res) => {
+  try {
+    const newProject = new Project(req.body);
+    const savedProject = await newProject.save();
+    res.status(201).json(savedProject);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// DELETE: Remove a Project (Protected)
+app.delete('/api/projects/:id', authenticateToken, async (req, res) => {
+  try {
+    await Project.findByIdAndDelete(req.params.id);
+    res.json({ message: "Project deleted successfully" });
+  } catch (err) {
+    res.status(500).json(err);
+  }
+}); 
 
 // Start Server
 const PORT = process.env.PORT || 5000;
