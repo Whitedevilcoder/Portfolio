@@ -11,74 +11,56 @@ const jwt = require('jsonwebtoken');
 const app = express();
 
 // Middleware
-app.use(express.json()); // Allows server to accept JSON data
-app.use(cors()); // Allows your frontend (React) to talk to this backend
+app.use(express.json()); 
+app.use(cors()); 
 
 // --- MIDDLEWARE: The Security Guard ---
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Get token from "Bearer TOKEN"
+  const token = authHeader && authHeader.split(' ')[1]; 
 
-  if (!token) return res.sendStatus(401); // No token? Go away.
+  if (!token) return res.sendStatus(401); 
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403); // Fake token? Go away.
+    if (err) return res.sendStatus(403); 
     req.user = user;
-    next(); // Pass? Come on in.
+    next(); 
   });
 };
+
+// Health Check
+app.get('/ping', (req, res) => res.send('PONG')); 
 
 // Database Connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected Successfully"))
   .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
-// --- API ROUTES ---
+// --- PUBLIC ROUTES (Anyone can see these) ---
 
 // 1. GET all projects
 app.get('/api/projects', async (req, res) => {
   try {
-    const projects = await Project.find().sort({ createdAt: -1 }); // Newest first
+    const projects = await Project.find().sort({ createdAt: -1 });
     res.json(projects);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// 2. POST a new project (We will use this to upload your resume data)
-app.post('/api/projects', async (req, res) => {
-  const project = new Project({
-    title: req.body.title,
-    description: req.body.description,
-    techStack: req.body.techStack,
-    category: req.body.category,
-    liveLink: req.body.liveLink,
-    githubLink: req.body.githubLink,
-    image: req.body.image
-  });
-
-  try {
-    const newProject = await project.save();
-    res.status(201).json(newProject);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// POST: Receive a new message
+// 2. POST Contact Message
 app.post('/api/contact', async (req, res) => {
   try {
     const newContact = new Contact(req.body);
-    await newContact.save(); // Save to MongoDB
+    await newContact.save(); 
     res.status(201).json({ message: "Message Sent Successfully!" });
   } catch (err) {
     res.status(500).json({ error: "Failed to send message" });
   }
 });
 
-// --- AUTHENTICATION ROUTES ---
+// --- AUTH ROUTES ---
 
-// 1. REGISTER (Run this ONCE to create your admin account, then delete)
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -91,7 +73,6 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-// 2. LOGIN (This gives you the 'VIP Badge')
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -102,7 +83,6 @@ app.post('/api/auth/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: "Invalid password" });
 
-    // Generate Token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
     res.json({ token, user: { username: user.username } });
 
@@ -111,7 +91,9 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// POST: Add a new Project (Protected)
+// --- PROTECTED ROUTES (Only Admin can do these) ---
+
+// POST: Add Project (Now this is the ONLY one, and it is secure)
 app.post('/api/projects', authenticateToken, async (req, res) => {
   try {
     const newProject = new Project(req.body);
@@ -122,7 +104,7 @@ app.post('/api/projects', authenticateToken, async (req, res) => {
   }
 });
 
-// DELETE: Remove a Project (Protected)
+// DELETE: Remove Project
 app.delete('/api/projects/:id', authenticateToken, async (req, res) => {
   try {
     await Project.findByIdAndDelete(req.params.id);
@@ -132,6 +114,5 @@ app.delete('/api/projects/:id', authenticateToken, async (req, res) => {
   }
 }); 
 
-// Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
