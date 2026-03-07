@@ -6,20 +6,22 @@ import API_URL from '../api';
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // NEW: State to track if we are editing an existing project
+  const [editingId, setEditingId] = useState(null); 
+  
   const navigate = useNavigate();
 
-  // Form State
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    techStack: '', // We will split this string into an array later
+    techStack: '', 
     liveLink: '',
     githubLink: '',
-    image: '', // Just a URL for now
+    image: '',
     category: 'WEB'
   });
 
-  // 1. Fetch Projects
   useEffect(() => {
     fetchProjects();
   }, []);
@@ -35,43 +37,73 @@ const Dashboard = () => {
     }
   };
 
-  // 2. Handle Input Change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 3. Handle Submit (Add Project)
+  // --- NEW: Handle Edit Button Click ---
+  const handleEditClick = (project) => {
+    setEditingId(project._id); // Tell the form we are in Edit Mode
+    
+    // Populate the form with the project's current data
+    setFormData({
+      title: project.title,
+      description: project.description,
+      techStack: project.techStack.join(', '), // Convert array back to comma string
+      liveLink: project.liveLink || '',
+      githubLink: project.githubLink || '',
+      image: project.image || '',
+      category: project.category
+    });
+
+    // Scroll smoothly to the top so you can see the form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // --- NEW: Cancel Edit Mode ---
+  const cancelEdit = () => {
+    setEditingId(null);
+    setFormData({
+      title: '', description: '', techStack: '', liveLink: '', githubLink: '', image: '', category: 'WEB'
+    });
+  };
+
+  // --- UPDATED: Handle Submit (Handles BOTH Add and Edit) ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      
-      // Convert "React, Node, Mongo" string -> ["React", "Node", "Mongo"] array
       const formattedData = {
         ...formData,
         techStack: formData.techStack.split(',').map(item => item.trim())
       };
 
-      const res = await axios.post(`${API_URL}/api/projects`, formattedData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      if (editingId) {
+        // --- UPDATE EXISTING PROJECT (PUT) ---
+        const res = await axios.put(`${API_URL}/api/projects/${editingId}`, formattedData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        // Update the project list in the UI without refreshing
+        setProjects(projects.map(p => p._id === editingId ? res.data : p));
+        alert("Project Updated Successfully! 🚀");
+        
+      } else {
+        // --- ADD NEW PROJECT (POST) ---
+        const res = await axios.post(`${API_URL}/api/projects`, formattedData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setProjects([res.data, ...projects]);
+        alert("Project Added Successfully! 🚀");
+      }
 
-      // Update UI instantly
-      setProjects([res.data, ...projects]);
-      
-      // Clear Form
-      setFormData({
-        title: '', description: '', techStack: '', liveLink: '', githubLink: '', image: '', category: 'WEB'
-      });
-
-      alert("Project Added Successfully! 🚀");
+      cancelEdit(); // Reset form back to Add Mode
 
     } catch (err) {
-      alert("Error adding project. Check your token!");
+      alert("Error saving project. Check your token!");
     }
   };
 
-  // 4. Handle Delete
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this project?")) return;
     try {
@@ -93,7 +125,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-cyber-black text-white font-mono p-4 md:p-8 pt-24 relative z-20">
       
-      {/* --- HEADER --- */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 md:mb-12 border-b border-gray-700 pb-4 gap-4">
         <h1 className="text-2xl md:text-3xl font-bold text-cyber-purple text-center md:text-left">
           /Admin/Dashboard
@@ -103,15 +135,17 @@ const Dashboard = () => {
         </button>
       </div>
 
-      {/* --- MAIN CONTENT GRID --- */}
-      {/* On Mobile: 1 Column. On Desktop: 2 Columns (1fr 2fr) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* --- LEFT COLUMN: ADD FORM --- */}
-        <div className="lg:col-span-1 bg-cyber-gray p-6 border border-gray-700 h-fit sticky top-24">
-          <h2 className="text-xl font-bold mb-4 text-cyber-purple">&lt;Add New /&gt;</h2>
+        {/* --- LEFT COLUMN: SMART FORM --- */}
+        <div className="lg:col-span-1 bg-cyber-gray p-6 border border-gray-700 h-fit sticky top-24 transition-all"
+             style={{ borderColor: editingId ? '#b829ea' : '#374151' }}> {/* Glows purple when editing */}
+          
+          <h2 className="text-xl font-bold mb-4 text-cyber-purple">
+            {editingId ? '<Edit Project />' : '<Add New />'}
+          </h2>
+          
           <form onSubmit={handleSubmit} className="space-y-4">
-            
             <input name="title" placeholder="Project Title" value={formData.title} onChange={handleChange} required
               className="w-full bg-black border border-gray-700 p-2 text-white focus:border-cyber-purple outline-none" />
             
@@ -127,7 +161,6 @@ const Dashboard = () => {
 
             <input name="techStack" placeholder="Tech Stack (comma separated)" value={formData.techStack} onChange={handleChange} required
               className="w-full bg-black border border-gray-700 p-2 text-white focus:border-cyber-purple outline-none" />
-            <p className="text-xs text-gray-500">Ex: React, Node, MongoDB</p>
 
             <input name="image" placeholder="Image URL (https://...)" value={formData.image} onChange={handleChange}
               className="w-full bg-black border border-gray-700 p-2 text-white focus:border-cyber-purple outline-none" />
@@ -139,9 +172,18 @@ const Dashboard = () => {
                 className="w-full bg-black border border-gray-700 p-2 text-white focus:border-cyber-purple outline-none" />
             </div>
 
-            <button type="submit" className="w-full bg-cyber-purple text-black font-bold py-2 hover:bg-white transition-colors">
-              PUBLISH PROJECT +
-            </button>
+            {/* Form Action Buttons */}
+            <div className="flex gap-2 pt-2">
+              <button type="submit" className="flex-1 bg-cyber-purple text-black font-bold py-2 hover:bg-white transition-colors">
+                {editingId ? 'SAVE CHANGES' : 'PUBLISH +'}
+              </button>
+              
+              {editingId && (
+                <button type="button" onClick={cancelEdit} className="flex-1 bg-gray-700 text-white font-bold py-2 hover:bg-red-500 transition-colors">
+                  CANCEL
+                </button>
+              )}
+            </div>
           </form>
         </div>
 
@@ -152,7 +194,7 @@ const Dashboard = () => {
           {loading ? <p className="animate-pulse">Scanning Database...</p> : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {projects.map(project => (
-                <div key={project._id} className="bg-cyber-gray p-4 border border-gray-700 hover:border-cyber-purple transition-all flex flex-col justify-between group">
+                <div key={project._id} className={`bg-cyber-gray p-4 border transition-all flex flex-col justify-between group ${editingId === project._id ? 'border-cyber-purple bg-black' : 'border-gray-700 hover:border-cyber-purple'}`}>
                   <div>
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-bold text-lg text-white group-hover:text-cyber-purple truncate">{project.title}</h3>
@@ -161,12 +203,21 @@ const Dashboard = () => {
                     <p className="text-gray-400 text-xs mb-4 line-clamp-2">{project.description}</p>
                   </div>
                   
-                  <button 
-                    onClick={() => handleDelete(project._id)}
-                    className="w-full bg-red-500/10 text-red-500 border border-red-500/50 py-1 text-sm hover:bg-red-500 hover:text-white transition-all"
-                  >
-                    Delete Project
-                  </button>
+                  {/* Card Action Buttons */}
+                  <div className="grid grid-cols-2 gap-2 mt-4">
+                    <button 
+                      onClick={() => handleEditClick(project)}
+                      className="w-full bg-cyber-purple/10 text-cyber-purple border border-cyber-purple/50 py-1 text-sm hover:bg-cyber-purple hover:text-black transition-all"
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(project._id)}
+                      className="w-full bg-red-500/10 text-red-500 border border-red-500/50 py-1 text-sm hover:bg-red-500 hover:text-white transition-all"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

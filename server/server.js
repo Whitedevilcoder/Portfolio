@@ -114,5 +114,21 @@ app.delete('/api/projects/:id', authenticateToken, async (req, res) => {
   }
 }); 
 
+// PUT: Update a Project (Protected)
+app.put('/api/projects/:id', authenticateToken, async (req, res) => {
+  try {
+    // findByIdAndUpdate takes (id, new_data, options)
+    // { new: true } tells MongoDB to return the updated version, not the old one
+    const updatedProject = await Project.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true } 
+    );
+    res.json(updatedProject);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
