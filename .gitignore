@@ -143,11 +143,11 @@ vite.config.ts.timestamp-*
 *.txt
 
 
-# Ignore logo/image files
-*.logo
-*.png
-*.jpg
-*.jpeg
-*.svg
-*.gif
-*.webp
+# # Ignore logo/image files
+# *.logo
+# *.png
+# *.jpg
+# *.jpeg
+# *.svg
+# *.gif
+# *.webp
