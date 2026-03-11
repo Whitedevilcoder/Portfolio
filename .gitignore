@@ -137,3 +137,17 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+
+# Ignore text files
+*.txt
+
+
+# Ignore logo/image files
+*.logo
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.gif
+*.webp
