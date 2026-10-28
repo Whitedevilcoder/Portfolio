@@ -5,13 +5,24 @@ import * as random from 'maath/random/dist/maath-random.esm';
 
 const Stars = (props) => {
   const ref = useRef();
-  // Generate 5000 random points inside a sphere
-  const [sphere] = useState(() => random.inSphere(new Float32Array(5000), { radius: 1.5 }));
+  
+  // FIX: 5000 particles * 3 coordinates (x, y, z) = 15000 total values
+  const [sphere] = useState(() => {
+    const data = new Float32Array(5000 * 3);
+    random.inSphere(data, { radius: 1.5 });
+    
+    // Safety Fallback: Replace any lingering NaN values with 0
+    for (let i = 0; i < data.length; i++) {
+      if (isNaN(data[i])) data[i] = 0;
+    }
+    return data;
+  });
 
   useFrame((state, delta) => {
-    // Rotate the group of stars slightly every frame
-    ref.current.rotation.x -= delta / 10;
-    ref.current.rotation.y -= delta / 15;
+    if (ref.current) {
+      ref.current.rotation.x -= delta / 10;
+      ref.current.rotation.y -= delta / 15;
+    }
   });
 
   return (
@@ -31,7 +42,7 @@ const Stars = (props) => {
 
 const Background = () => {
   return (
-    <div className="fixed inset-0 z-0">
+    <div className="fixed inset-0 z-0 pointer-events-none">
       <Canvas camera={{ position: [0, 0, 1] }}>
         <Stars />
       </Canvas>
