@@ -12,7 +12,7 @@ const Contact = () => {
     setStatus('Sending...');
 
     try {
-      await axios.post(`${ API_URL }/api/contact`, formData);
+      await axios.post(`${API_URL}/api/contact`, formData);
       setStatus('Message Transmitted Successfully! ✅');
       setFormData({ name: '', email: '', message: '' }); // Clear form immediately
 
@@ -67,7 +67,8 @@ const Contact = () => {
             <label className="block text-cyber-purple font-mono text-sm mb-2">/User/Name</label>
             <input
               type="text"
-              required
+              aria-label="Name"
+              required 
               className="w-full bg-black border border-gray-700 p-3 text-white focus:border-cyber-purple focus:outline-none transition-colors"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -79,6 +80,7 @@ const Contact = () => {
             <label className="block text-cyber-purple font-mono text-sm mb-2">/User/Email</label>
             <input
               type="email"
+              aria-label="Email Address"
               required
               className="w-full bg-black border border-gray-700 p-3 text-white focus:border-cyber-purple focus:outline-none transition-colors"
               value={formData.email}

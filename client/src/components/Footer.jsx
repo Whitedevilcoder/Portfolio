@@ -19,7 +19,7 @@ const Footer = () => {
         <div className="text-center md:text-right">
           <h3 className="text-white font-bold text-lg mb-2">Media</h3>
           <div className="flex gap-4 justify-center md:justify-end text-gray-400">
-            <a href="https://github.com/Whitedevilcoder" className="hover:text-cyber-purple transition-colors"><FaGithub size={20} /></a>
+            <a href="https://github.com/Whitedevilcoder" className="hover:text-cyber-purple transition-colors" aria-label="GitHub Profile"><FaGithub size={20} /></a>
             <a href="https://www.linkedin.com/in/praveen-kumar6405/" className="hover:text-cyber-purple transition-colors"><FaLinkedin size={20} /></a>
             <a href="https://x.com/PraveenKumar680" className="hover:text-cyber-purple transition-colors"><FaTwitter size={20} /></a>
             <a href="https://www.instagram.com/itzspraveenhere/" className="hover:text-cyber-purple transition-colors"><FaInstagram size={20} /></a>
