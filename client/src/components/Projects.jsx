@@ -1,18 +1,19 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
+import API_URL from '../api';
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [filter, setFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
 
-  // --- FETCH LOGIC (Updated for Vercel Serverless 0ms Cold Start) ---
+  // --- FETCH LOGIC (Restored to Render Backend) ---
   useEffect(() => {
     // Minimum 1.5s load time for the cool animation
     const timer = new Promise(resolve => setTimeout(resolve, 1500));
-    // Fetching directly from the new local Vercel serverless function
-    const fetcher = axios.get('/api/projects');
+    // Fetching from your Render URL via API_URL
+    const fetcher = axios.get(`${API_URL}/api/projects`);
 
     Promise.all([timer, fetcher])
       .then(([_, res]) => {
@@ -49,7 +50,7 @@ const Projects = () => {
           <button 
             key={cat}
             onClick={() => setFilter(cat)}
-            aria-label={`Filter projects by ${cat}`} // Agentic/A11y Fix
+            aria-label={`Filter projects by ${cat}`} 
             className={`px-4 py-1 border transition-all whitespace-nowrap ${
               filter === cat 
                 ? 'border-cyber-purple text-cyber-purple' 
@@ -78,7 +79,7 @@ const Projects = () => {
               Hacking the server to show the details of the projects
             </p>
             <p className="text-gray-600 font-mono text-xs">
-              (Bypassing Render - Connection should be instant)
+              (This may take 45s for the first connection due to server sleep)
             </p>
           </motion.div>
         ) : (
@@ -93,13 +94,11 @@ const Projects = () => {
                 <motion.div 
                   key={project._id}
                   layout 
-                  /* --- SCROLL ANIMATION RESTORED HERE --- */
-                  initial={{ opacity: 0, y: 50 }}         // Start: Invisible and 50px down
-                  whileInView={{ opacity: 1, y: 0 }}      // End: Visible and in place
-                  viewport={{ once: false, amount: 0.2 }}  // Trigger when 20% visible, only once
-                  transition={{ duration: 0.5, delay: index * 0.1 }} // Staggered effect
-                  exit={{ opacity: 0, scale: 0.9 }}       // Smooth exit when filtering
-                  /* ------------------------------------ */
+                  initial={{ opacity: 0, y: 50 }}         
+                  whileInView={{ opacity: 1, y: 0 }}      
+                  viewport={{ once: false, amount: 0.2 }}  
+                  transition={{ duration: 0.5, delay: index * 0.1 }} 
+                  exit={{ opacity: 0, scale: 0.9 }}       
                   className="border border-gray-700 bg-cyber-gray hover:border-cyber-purple transition-all flex flex-col h-full group overflow-hidden"
                 >
                   
@@ -108,7 +107,7 @@ const Projects = () => {
                     {project.image ? (
                       <img 
                         src={project.image} 
-                        alt={`Preview of ${project.title}`} // Agentic/A11y Fix
+                        alt={`Preview of ${project.title}`} 
                         loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
@@ -142,7 +141,6 @@ const Projects = () => {
                       {project.description}
                     </p>
 
-                    {/* Agentic/A11y Fix: Added specific aria-labels so links are no longer "identical" */}
                     <div className="flex gap-4 mt-auto pt-4 border-t border-gray-800">
                       <a 
                         href={project.liveLink || "#"} 
