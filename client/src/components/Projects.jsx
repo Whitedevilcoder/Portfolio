@@ -14,6 +14,7 @@ const Projects = () => {
     const timer = new Promise(resolve => setTimeout(resolve, 1500));
     const fetcher = axios.get(`${API_URL}/api/projects`);
 
+
     Promise.all([timer, fetcher])
       .then(([_, res]) => {
         setProjects(res.data);
