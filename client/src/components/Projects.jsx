@@ -1,19 +1,18 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import API_URL from '../api';
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [filter, setFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
 
-  // --- FETCH LOGIC ---
+  // --- FETCH LOGIC (Updated for Vercel Serverless 0ms Cold Start) ---
   useEffect(() => {
     // Minimum 1.5s load time for the cool animation
     const timer = new Promise(resolve => setTimeout(resolve, 1500));
-    const fetcher = axios.get(`${API_URL}/api/projects`);
-
+    // Fetching directly from the new local Vercel serverless function
+    const fetcher = axios.get('/api/projects');
 
     Promise.all([timer, fetcher])
       .then(([_, res]) => {
@@ -50,6 +49,7 @@ const Projects = () => {
           <button 
             key={cat}
             onClick={() => setFilter(cat)}
+            aria-label={`Filter projects by ${cat}`} // Agentic/A11y Fix
             className={`px-4 py-1 border transition-all whitespace-nowrap ${
               filter === cat 
                 ? 'border-cyber-purple text-cyber-purple' 
@@ -78,7 +78,7 @@ const Projects = () => {
               Hacking the server to show the details of the projects
             </p>
             <p className="text-gray-600 font-mono text-xs">
-              (This may take 30s for the first connection)
+              (Bypassing Render - Connection should be instant)
             </p>
           </motion.div>
         ) : (
@@ -108,7 +108,7 @@ const Projects = () => {
                     {project.image ? (
                       <img 
                         src={project.image} 
-                        alt={project.title} 
+                        alt={`Preview of ${project.title}`} // Agentic/A11y Fix
                         loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
@@ -142,11 +142,24 @@ const Projects = () => {
                       {project.description}
                     </p>
 
+                    {/* Agentic/A11y Fix: Added specific aria-labels so links are no longer "identical" */}
                     <div className="flex gap-4 mt-auto pt-4 border-t border-gray-800">
-                      <a href={project.liveLink || "#"} target="_blank" rel="noreferrer" className="text-cyber-purple text-sm font-mono hover:underline border border-cyber-purple px-3 py-1 hover:bg-cyber-purple hover:text-black transition-all">
+                      <a 
+                        href={project.liveLink || "#"} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        aria-label={`View live demo of ${project.title}`}
+                        className="text-cyber-purple text-sm font-mono hover:underline border border-cyber-purple px-3 py-1 hover:bg-cyber-purple hover:text-black transition-all"
+                      >
                         Live &lt;~&gt;
                       </a>
-                      <a href={project.githubLink || "#"} target="_blank" rel="noreferrer" className="text-gray-500 text-sm font-mono hover:text-white transition-colors flex items-center gap-1">
+                      <a 
+                        href={project.githubLink || "#"} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        aria-label={`View source code of ${project.title} on GitHub`}
+                        className="text-gray-500 text-sm font-mono hover:text-white transition-colors flex items-center gap-1"
+                      >
                         Source &gt;
                       </a>
                     </div>
