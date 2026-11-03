@@ -2,27 +2,37 @@ import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import API_URL from '../api';
+import { fallbackProjects } from '../fallbackProjects'; // Import your static fallback
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [filter, setFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
 
-  // --- FETCH LOGIC (Restored to Render Backend) ---
+  // --- STALE-WHILE-REVALIDATE FETCH LOGIC ---
   useEffect(() => {
-    // Minimum 1.5s load time for the cool animation
-    const timer = new Promise(resolve => setTimeout(resolve, 1500));
-    // Fetching from your Render URL via API_URL
-    const fetcher = axios.get(`${API_URL}/api/projects`);
+    // 1. Check local storage for cached projects
+    const cachedProjects = localStorage.getItem('portfolio_projects');
+    
+    if (cachedProjects) {
+      // Instantly load from cache (0ms delay for returning visitors)
+      setProjects(JSON.parse(cachedProjects));
+      setLoading(false);
+    } else {
+      // Instantly load static fallback (0ms delay for first-time visitors)
+      setProjects(fallbackProjects);
+      setLoading(false);
+    }
 
-    Promise.all([timer, fetcher])
-      .then(([_, res]) => {
+    // 2. Ping the sleeping Render server in the background
+    axios.get(`${API_URL}/api/projects`)
+      .then((res) => {
+        // 3. When Render wakes up (45s later), silently update UI and cache
         setProjects(res.data);
-        setLoading(false);
+        localStorage.setItem('portfolio_projects', JSON.stringify(res.data));
       })
       .catch(err => {
-        console.error("Error fetching projects:", err);
-        setLoading(false);
+        console.error("Render Backend asleep or error:", err);
       });
   }, []);
 
@@ -65,7 +75,7 @@ const Projects = () => {
       {/* --- CONTENT AREA --- */}
       <AnimatePresence mode='wait'>
         {loading ? (
-          /* LOADING SCREEN */
+          /* LOADING SCREEN (Rarely seen now) */
           <motion.div 
             key="loader"
             initial={{ opacity: 0 }}
@@ -75,11 +85,7 @@ const Projects = () => {
           >
             <div className="w-16 h-16 border-4 border-cyber-purple border-t-transparent rounded-full animate-spin"></div>
             <p className="text-cyber-purple font-mono text-sm animate-pulse text-center leading-relaxed">
-              &gt; Establishing Uplink to Server... <br />
-              Hacking the server to show the details of the projects
-            </p>
-            <p className="text-gray-600 font-mono text-xs">
-              (This may take 45s for the first connection due to server sleep)
+              &gt; Establishing Uplink to Server...
             </p>
           </motion.div>
         ) : (
