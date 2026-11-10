@@ -10,3 +10,23 @@ body {
   width: 100%;
   position: relative;
 }
+
+/* Dark theme overrides for React Flow */
+.react-flow__node-default, 
+.react-flow__node-input, 
+.react-flow__node-output {
+  background: #111;
+  color: #fff;
+  border: 1px solid #333;
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+.react-flow__edge-path {
+  stroke: #666;
+  stroke-width: 2;
+}
+
+.react-flow__edge.animated path {
+  stroke: #00f0ff; /* A nice neon accent for active data streams */
+}
