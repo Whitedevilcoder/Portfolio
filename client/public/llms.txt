@@ -1,0 +1,12 @@
+# G Praveen - Portfolio
+
+> Background: I am a Full-Stack and AI Engineer based in India, specializing in MERN architectures, computer vision, and IoT systems.
+
+## Key Projects
+- ConnectMusic: Real-time synchronized audio streaming.
+- Brandrova: Digital transformation agency infrastructure.
+- ISABELLE: Computer vision AI assistant.
+
+## Links
+- [GitHub](https://github.com/Whitedevilcoder)
+- [LinkedIn](https://www.linkedin.com/in/praveen-kumar6405/)

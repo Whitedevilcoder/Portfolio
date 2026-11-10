@@ -140,7 +140,7 @@ vite.config.ts.timestamp-*
 
 
 # Ignore text files
-*.txt
+*portfolio.txt
 
 
 # # Ignore logo/image files
