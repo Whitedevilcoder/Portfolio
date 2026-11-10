@@ -29,5 +29,3 @@ export default function WebhookArchitecture() {
   );
 }
 
-import WebhookArchitecture from './architecture/WebhookArchitecture';
-<WebhookArchitecture/>

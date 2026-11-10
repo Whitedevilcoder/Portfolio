@@ -3,6 +3,8 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import API_URL from '../api';
 import { fallbackProjects } from '../fallbackProjects'; // Import your static fallback
+import WebhookArchitecture from './architecture/WebhookArchitecture';
+
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
@@ -168,7 +170,9 @@ const Projects = () => {
                       </a>
                     </div>
                   </div>
-
+                  <div>
+                    <WebhookArchitecture/>
+                  </div>
                 </motion.div>
               ))}
             </AnimatePresence>
