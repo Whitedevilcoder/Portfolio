@@ -3,13 +3,14 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import API_URL from '../api';
 import { fallbackProjects } from '../fallbackProjects'; // Import your static fallback
-import WebhookArchitecture from './architecture/WebhookArchitecture';
-
+import ProjectModal from './ProjectModal';
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [filter, setFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
+
+  const [selectedProject, setSelectedProject] = useState(null);
 
   // --- STALE-WHILE-REVALIDATE FETCH LOGIC ---
   useEffect(() => {
@@ -170,13 +171,19 @@ const Projects = () => {
                       </a>
                     </div>
                   </div>
-                  <div>
-                    <WebhookArchitecture/>
-                  </div>
+                  
                 </motion.div>
               ))}
             </AnimatePresence>
           </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {selectedProject && (
+          <ProjectModal 
+            project={selectedProject} 
+            onClose={() => setSelectedProject(null)} 
+          />
         )}
       </AnimatePresence>
     </section>
