@@ -10,23 +10,35 @@ body {
   width: 100%;
   position: relative;
 }
+/* src/index.css */
 
-/* Dark theme overrides for React Flow */
-.react-flow__node-default, 
-.react-flow__node-input, 
-.react-flow__node-output {
-  background: #111;
-  color: #fff;
-  border: 1px solid #333;
-  border-radius: 8px;
-  font-family: inherit;
+/* React Flow Dark Theme Overrides */
+.react-flow__controls-button {
+  background-color: #111 !important;
+  border-bottom: 1px solid #333 !important;
+  border-left: 1px solid #333 !important;
+  border-right: 1px solid #333 !important;
 }
 
-.react-flow__edge-path {
-  stroke: #666;
-  stroke-width: 2;
+.react-flow__controls-button:first-child {
+  border-top: 1px solid #333 !important;
+  border-radius: 4px 4px 0 0 !important;
 }
 
-.react-flow__edge.animated path {
-  stroke: #00f0ff; /* A nice neon accent for active data streams */
+.react-flow__controls-button:last-child {
+  border-radius: 0 0 4px 4px !important;
+}
+
+/* Make the icons visible with your cyber-purple/blue aesthetic */
+.react-flow__controls-button svg {
+  fill: #a855f7 !important; /* Tailwind purple-500 */
+  transition: fill 0.2s;
+}
+
+.react-flow__controls-button:hover {
+  background-color: #222 !important;
+}
+
+.react-flow__controls-button:hover svg {
+  fill: #fff !important;
 }

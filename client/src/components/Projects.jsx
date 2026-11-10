@@ -2,44 +2,35 @@ import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import API_URL from '../api';
-import { fallbackProjects } from '../fallbackProjects'; // Import your static fallback
-import ProjectModal from './ProjectModal';
+import { fallbackProjects } from '../fallbackProjects';
+import ProjectModal from './ProjectModal'; // <--- Make sure this is imported!
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [filter, setFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
-
+  
+  // STATE FOR THE POPUP MODAL
   const [selectedProject, setSelectedProject] = useState(null);
 
-  // --- STALE-WHILE-REVALIDATE FETCH LOGIC ---
   useEffect(() => {
-    // 1. Check local storage for cached projects
     const cachedProjects = localStorage.getItem('portfolio_projects');
-    
     if (cachedProjects) {
-      // Instantly load from cache (0ms delay for returning visitors)
       setProjects(JSON.parse(cachedProjects));
       setLoading(false);
     } else {
-      // Instantly load static fallback (0ms delay for first-time visitors)
       setProjects(fallbackProjects);
       setLoading(false);
     }
 
-    // 2. Ping the sleeping Render server in the background
     axios.get(`${API_URL}/api/projects`)
       .then((res) => {
-        // 3. When Render wakes up (45s later), silently update UI and cache
         setProjects(res.data);
         localStorage.setItem('portfolio_projects', JSON.stringify(res.data));
       })
-      .catch(err => {
-        console.error("Render Backend asleep or error:", err);
-      });
+      .catch(err => console.error("Render Backend asleep or error:", err));
   }, []);
 
-  // Filter Logic
   const filteredProjects = useMemo(() => {
     return filter === 'ALL' 
       ? projects 
@@ -63,7 +54,6 @@ const Projects = () => {
           <button 
             key={cat}
             onClick={() => setFilter(cat)}
-            aria-label={`Filter projects by ${cat}`} 
             className={`px-4 py-1 border transition-all whitespace-nowrap ${
               filter === cat 
                 ? 'border-cyber-purple text-cyber-purple' 
@@ -75,51 +65,31 @@ const Projects = () => {
         ))}
       </div>
 
-      {/* --- CONTENT AREA --- */}
       <AnimatePresence mode='wait'>
         {loading ? (
-          /* LOADING SCREEN (Rarely seen now) */
-          <motion.div 
-            key="loader"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col items-center justify-center h-64 space-y-6"
-          >
+          <motion.div key="loader" className="flex flex-col items-center justify-center h-64 space-y-6">
             <div className="w-16 h-16 border-4 border-cyber-purple border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-cyber-purple font-mono text-sm animate-pulse text-center leading-relaxed">
-              &gt; Establishing Uplink to Server...
-            </p>
           </motion.div>
         ) : (
-          /* GRID */
-          <motion.div 
-            key="grid"
-            layout 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20"
-          >
+          <motion.div key="grid" layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
             <AnimatePresence mode='popLayout'>
               {filteredProjects.map((project, index) => (
                 <motion.div 
                   key={project._id}
                   layout 
-                  initial={{ opacity: 0, y: 50 }}         
+                  initial={{ opacity: 0, y: 50 }}        
                   whileInView={{ opacity: 1, y: 0 }}      
                   viewport={{ once: false, amount: 0.2 }}  
                   transition={{ duration: 0.5, delay: index * 0.1 }} 
                   exit={{ opacity: 0, scale: 0.9 }}       
-                  className="border border-gray-700 bg-cyber-gray hover:border-cyber-purple transition-all flex flex-col h-full group overflow-hidden"
+                  className="border border-gray-700 bg-cyber-gray hover:border-cyber-purple transition-all flex flex-col h-full group overflow-hidden cursor-pointer"
+                  onClick={() => setSelectedProject(project)} // <--- THIS OPENS THE MODAL
                 >
                   
                   {/* IMAGE AREA */}
                   <div className="h-48 w-full bg-gray-900 overflow-hidden relative border-b border-gray-700 shrink-0">
                     {project.image ? (
-                      <img 
-                        src={project.image} 
-                        alt={`Preview of ${project.title}`} 
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
+                      <img src={project.image} alt={project.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-black">
                         <span className="text-cyber-purple font-mono text-2xl font-bold opacity-30">
@@ -151,33 +121,22 @@ const Projects = () => {
                     </p>
 
                     <div className="flex gap-4 mt-auto pt-4 border-t border-gray-800">
-                      <a 
-                        href={project.liveLink || "#"} 
-                        target="_blank" 
-                        rel="noreferrer" 
-                        aria-label={`View live demo of ${project.title}`}
-                        className="text-cyber-purple text-sm font-mono hover:underline border border-cyber-purple px-3 py-1 hover:bg-cyber-purple hover:text-black transition-all"
-                      >
+                      <a href={project.liveLink || "#"} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="text-cyber-purple text-sm font-mono hover:underline border border-cyber-purple px-3 py-1 hover:bg-cyber-purple hover:text-black transition-all">
                         Live &lt;~&gt;
                       </a>
-                      <a 
-                        href={project.githubLink || "#"} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        aria-label={`View source code of ${project.title} on GitHub`}
-                        className="text-gray-500 text-sm font-mono hover:text-white transition-colors flex items-center gap-1"
-                      >
+                      <a href={project.githubLink || "#"} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="text-gray-500 text-sm font-mono hover:text-white transition-colors flex items-center gap-1">
                         Source &gt;
                       </a>
                     </div>
                   </div>
-                  
                 </motion.div>
               ))}
             </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* THIS IS THE POPUP MODAL THAT HOLDS THE DIAGRAM */}
       <AnimatePresence>
         {selectedProject && (
           <ProjectModal 
@@ -186,6 +145,7 @@ const Projects = () => {
           />
         )}
       </AnimatePresence>
+      
     </section>
   );
 };
